@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Senarai RSVP</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // 🔹 Firebase Config (tukar dengan config project kau)
+    const firebaseConfig = {
+       apiKey: "AIzaSyAyXoBcnGabIuKSaCjso_hA5CsCDqKnNek",
+        authDomain: "wedding-guestbook-2086a.firebaseapp.com",
+        projectId: "wedding-guestbook-2086a",
+        storageBucket: "wedding-guestbook-2086a.firebasestorage.app",
+        messagingSenderId: "54243617499",
+        appId: "1:54243617499:web:bde886a3be0540492dfafe",
+        measurementId: "G-CW3N7JZ6NT"
+    };
+
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 🔹 Listen semua data RSVP
+    function listenRSVPs() {
+      const rsvpsRef = collection(db, "rsvps");
+
+      onSnapshot(rsvpsRef, (snapshot) => {
+        let total = 0;
+        let tableRows = "";
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const name = data.name || "-";
+          const attending = data.attending || "-";
+          const pax = data.pax || 0;
+          const note = data.note || "";
+
+          // Kira total pax (hanya yang attending yes)
+          if (attending === "yes") {
+            total += pax;
+          }
+
+          tableRows += `
+            <tr>
+              <td>${name}</td>
+              <td>${attending}</td>
+              <td>${pax}</td>
+              <td>${note}</td>
+            </tr>
+          `;
+        });
+
+        // Update HTML
+        document.getElementById("rsvp-table-body").innerHTML = tableRows;
+        document.getElementById("total-pax").innerText = total;
+      });
+    }
+
+    listenRSVPs();
+  </script>
+</head>
+<body style="font-family: Arial, sans-serif; text-align:center; padding:20px;">
+
+  <h2>Senarai RSVP</h2>
+
+  <!-- Jumlah Pax -->
+  <h3>Jumlah Pax Hadir: <span id="total-pax">0</span></h3>
+
+  <!-- Table -->
+  <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse;">
+    <thead style="background:#f2f2f2;">
+      <tr>
+        <th>Nama</th>
+        <th>Kehadiran</th>
+        <th>Pax</th>
+        <th>Ucapan/Nota</th>
+      </tr>
+    </thead>
+    <tbody id="rsvp-table-body">
+      <!-- Data akan muncul sini -->
+    </tbody>
+  </table>
+
+</body>
+</html>
+
+   
