@@ -89,6 +89,20 @@
     }
 
     listenRSVPs();
+
+// Restore saved states from localStorage
+document.querySelectorAll('#rsvp-table-body input[type="checkbox"]').forEach((cb, i) => {
+  if (localStorage.getItem("checkbox_" + i) === "true") {
+    cb.checked = true;
+  }
+
+  // Save state on change
+  cb.addEventListener("change", function() {
+    localStorage.setItem("checkbox_" + i, this.checked);
+  });
+});
+
+    
   </script>
 </head>
 <body style="font-family: Times New Roman, sans-serif; text-align:center; padding:20px;">
@@ -107,7 +121,7 @@
   <!-- Table -->
   <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse; width:90%;">
      <!-- Jumlah Pax -->
-  <h4 style="text-align:left;">Jumlah Pax Hadir: <span id="total-pax">0</span></h4> 
+  <h4 style="text-align:center;">Jumlah Pax Hadir: <span id="total-pax">0</span></h4> 
     <thead style="background:#f2f2f2;">
       <tr>
         <th style="text-align:center;">Bil.</th>
