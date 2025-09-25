@@ -10,33 +10,36 @@
 
     // 🔹 Firebase Config
     const firebaseConfig = {
-       apiKey: "AIzaSyAyXoBcnGabIuKSaCjso_hA5CsCDqKnNek",
-        authDomain: "wedding-guestbook-2086a.firebaseapp.com",
-        projectId: "wedding-guestbook-2086a",
-        storageBucket: "wedding-guestbook-2086a.firebasestorage.app",
-        messagingSenderId: "54243617499",
-        appId: "1:54243617499:web:bde886a3be0540492dfafe",
-        measurementId: "G-CW3N7JZ6NT"
+      apiKey: "AIzaSyAyXoBcnGabIuKSaCjso_hA5CsCDqKnNek",
+      authDomain: "wedding-guestbook-2086a.firebaseapp.com",
+      projectId: "wedding-guestbook-2086a",
+      storageBucket: "wedding-guestbook-2086a.firebasestorage.app",
+      messagingSenderId: "54243617499",
+      appId: "1:54243617499:web:bde886a3be0540492dfafe",
+      measurementId: "G-CW3N7JZ6NT"
     };
 
     // Init Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
- // Search function
-  document.getElementById('searchInput').addEventListener('keyup', function() {
-    let filter = this.value.toLowerCase();
-    let rows = document.querySelectorAll('#guestTable tbody tr');
+    // Search function
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('searchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#rsvp-table-body tr');
 
-    rows.forEach(row => {
-      let nameCell = row.cells[1].textContent.toLowerCase(); // column Nama
-      if (nameCell.indexOf(filter) > -1) {
-        row.style.display = "";
-      } else {
-        row.style.display = "none";
-      }
-    });
+        rows.forEach(row => {
+          let nameCell = row.cells[1].textContent.toLowerCase(); // column Nama
+          if (nameCell.indexOf(filter) > -1) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
       });
+    });
+
     // 🔹 Listen RSVP data
     function listenRSVPs() {
       const rsvpsRef = collection(db, "rsvps");
@@ -64,10 +67,10 @@
 
           tableRows += `
             <tr>
-              <td style="text-align:center;>${index++}</td>
+              <td style="text-align:center;">${index++}</td>
               <td>${name}</td>
-              <td style="text-align:center;>${attending}</td>
-              <td style="text-align:center;>${pax}</td>
+              <td style="text-align:center;">${attending}</td>
+              <td style="text-align:center;">${pax}</td>
               <td>${note}</td>
               <td style="text-align:center; display:none;">
                 <input type="checkbox" ${checked} disabled>
@@ -86,11 +89,6 @@
     }
 
     listenRSVPs();
-
- 
- 
-
-    
   </script>
 </head>
 <body style="font-family: Arial, sans-serif; text-align:center; padding:20px;">
@@ -99,8 +97,11 @@
 
   <!-- Jumlah Pax -->
   <h3>Jumlah Pax Hadir: <span id="total-pax">0</span></h3>
-<input type="text" id="searchInput" placeholder="Cari nama..." 
-       style="margin-bottom:10px; padding:5px; width:200px;">
+
+  <!-- Search bar -->
+  <input type="text" id="searchInput" placeholder="Cari nama..." 
+         style="margin-bottom:10px; padding:5px; width:200px;">
+
   <!-- Table -->
   <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse; width:90%;">
     <thead style="background:#f2f2f2;">
