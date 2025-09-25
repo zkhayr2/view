@@ -4,10 +4,12 @@
   <title>Senarai RSVP</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { 
+      getFirestore, collection, onSnapshot, query, orderBy, 
+      doc, updateDoc 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // 🔹 Firebase Config (tukar dengan config project kau)
+    // 🔹 Firebase Config
     const firebaseConfig = {
        apiKey: "AIzaSyAyXoBcnGabIuKSaCjso_hA5CsCDqKnNek",
         authDomain: "wedding-guestbook-2086a.firebaseapp.com",
@@ -22,41 +24,42 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 🔹 Listen semua data RSVP (sort ikut nama A-Z)
+    // 🔹 Listen RSVP data
     function listenRSVPs() {
       const rsvpsRef = collection(db, "rsvps");
-      const q = query(rsvpsRef, orderBy("name", "asc")); // <-- sort by name A-Z
+      const q = query(rsvpsRef, orderBy("name", "asc"));
 
       onSnapshot(q, (snapshot) => {
         let total = 0;
         let tableRows = "";
-        let index = 1; // counter untuk column Bil
+        let index = 1;
 
-        snapshot.forEach((doc) => {
-          const data = doc.data();
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const id = docSnap.id;
           const name = data.name || "-";
-          const attending = data.attending || "-";
+          const attending = data.attending || "no";
           const pax = data.pax || 0;
           const note = data.note || "";
 
-          // Kira total pax (hanya yang attending yes)
+          // Kira total pax
           if (attending === "yes") {
             total += pax;
           }
 
-          // Kolum tick/cross
-          const statusIcon = attending === "yes" 
-            ? '<span style="color:green;">&#10004;</span>' 
-            : '<span style="color:red;">&#10008;</span>';
+          // Checkbox ikut status hadir
+          const checked = attending === "yes" ? "checked" : "";
 
           tableRows += `
             <tr>
               <td>${index++}</td>
-              <td style="text-align:left;">${name}</td>
+              <td>${name}</td>
               <td>${attending}</td>
               <td>${pax}</td>
               <td>${note}</td>
-              <td style="text-align:center;">${statusIcon}</td>
+              <td style="text-align:center;">
+                <input type="checkbox" data-id="${id}" ${checked}>
+              </td>
             </tr>
           `;
         });
@@ -64,6 +67,17 @@
         // Update HTML
         document.getElementById("rsvp-table-body").innerHTML = tableRows;
         document.getElementById("total-pax").innerText = total;
+
+        // 🔹 Add listeners untuk setiap checkbox
+        document.querySelectorAll('input[type="checkbox"][data-id]').forEach((checkbox) => {
+          checkbox.addEventListener("change", async (e) => {
+            const docId = e.target.getAttribute("data-id");
+            const newStatus = e.target.checked ? "yes" : "no";
+            const docRef = doc(db, "rsvps", docId);
+
+            await updateDoc(docRef, { attending: newStatus });
+          });
+        });
       });
     }
 
@@ -78,15 +92,15 @@
   <h3>Jumlah Pax Hadir: <span id="total-pax">0</span></h3>
 
   <!-- Table -->
-  <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse;">
+  <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse; width:90%;">
     <thead style="background:#f2f2f2;">
       <tr>
-        <th>Bil.</th>
-        <th>Nama</th>
-        <th>Kehadiran</th>
-        <th>Pax</th>
-        <th>Ucapan/Nota</th>
-        <th>Status</th> <!--  Kolum baru -->
+        <th style="text-align:center;">Bil.</th>
+        <th style="text-align:left;">Nama</th>
+        <th style="text-align:center;">Kehadiran</th>
+        <th style="text-align:center;">Pax</th>
+        <th style="text-align:center;">Ucapan/Nota</th>
+        <th style="text-align:center;">Tick kehadiran</th>
       </tr>
     </thead>
     <tbody id="rsvp-table-body">
