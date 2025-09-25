@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -31,6 +30,7 @@
       onSnapshot(q, (snapshot) => {
         let total = 0;
         let tableRows = "";
+        let index = 1; // counter untuk column Bil
 
         snapshot.forEach((doc) => {
           const data = doc.data();
@@ -44,12 +44,19 @@
             total += pax;
           }
 
+          // Kolum tick/cross
+          const statusIcon = attending === "yes" 
+            ? '<span style="color:green;">&#10004;</span>' 
+            : '<span style="color:red;">&#10008;</span>';
+
           tableRows += `
             <tr>
+              <td>${index++}</td>
               <td style="text-align:left;">${name}</td>
               <td>${attending}</td>
               <td>${pax}</td>
               <td>${note}</td>
+              <td style="text-align:center;">${statusIcon}</td>
             </tr>
           `;
         });
@@ -74,10 +81,12 @@
   <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse;">
     <thead style="background:#f2f2f2;">
       <tr>
-        <th style="text-align:left;">Nama</th>
+        <th>Bil.</th>
+        <th>Nama</th>
         <th>Kehadiran</th>
         <th>Pax</th>
         <th>Ucapan/Nota</th>
+        <th>Status</th> <!--  Kolum baru -->
       </tr>
     </thead>
     <tbody id="rsvp-table-body">
