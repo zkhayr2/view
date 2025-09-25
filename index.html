@@ -23,21 +23,23 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 🔍 Search function
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById('searchInput').addEventListener('keyup', function() {
-        let filter = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#rsvp-table-body tr');
-
-        rows.forEach(row => {
-          let nameCell = row.cells[1].textContent.toLowerCase(); // column Nama
-          if (nameCell.indexOf(filter) > -1) {
-            row.style.display = "";
-          } else {
-            row.style.display = "none";
-          }
-        });
+    // 🔍 Function apply filter semula
+    function applyFilter() {
+      const filter = document.getElementById("searchInput").value.toLowerCase();
+      const rows = document.querySelectorAll("#rsvp-table-body tr");
+      rows.forEach(row => {
+        const nameCell = row.cells[1]?.textContent.toLowerCase() || "";
+        if (nameCell.includes(filter)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
       });
+    }
+
+    // 🔹 Event listener search
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('searchInput').addEventListener('keyup', applyFilter);
     });
 
     // 🔹 Listen RSVP data
@@ -88,9 +90,13 @@
           `;
         });
 
+        // 🔹 Update table
         document.getElementById("rsvp-table-body").innerHTML = tableRows;
         document.getElementById("total-rsvp").innerText = totalRSVP;
         document.getElementById("total-actual").innerText = totalActual;
+
+        // 🔹 Apply search filter semula selepas table reload
+        applyFilter();
 
         // 🔹 Checkbox update
         document.querySelectorAll(".checkBox").forEach(cb => {
