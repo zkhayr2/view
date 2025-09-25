@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -31,6 +30,7 @@
       onSnapshot(q, (snapshot) => {
         let total = 0;
         let tableRows = "";
+        let index = 1; // counter untuk column Bil
 
         snapshot.forEach((doc) => {
           const data = doc.data();
@@ -46,6 +46,7 @@
 
           tableRows += `
             <tr>
+              <td>${index++}</td>
               <td>${name}</td>
               <td>${attending}</td>
               <td>${pax}</td>
@@ -74,6 +75,7 @@
   <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse;">
     <thead style="background:#f2f2f2;">
       <tr>
+        <th>Bil.</th>
         <th>Nama</th>
         <th>Kehadiran</th>
         <th>Pax</th>
