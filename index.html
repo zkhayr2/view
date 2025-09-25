@@ -5,7 +5,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { 
-      getFirestore, collection, onSnapshot, query, orderBy
+      getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     // 🔹 Firebase Config
@@ -23,7 +23,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Search function
+    // 🔍 Search function
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('searchInput').addEventListener('keyup', function() {
         let filter = this.value.toLowerCase();
@@ -52,18 +52,16 @@
 
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
+          const id = docSnap.id; // penting untuk update
           const name = data.name || "-";
           const attending = data.attending || "no";
           const pax = data.pax || 0;
           const note = data.note || "";
+          const checked = data.checked ? "checked" : "";
 
-          // Kira total pax
           if (attending === "yes") {
             total += pax;
           }
-
-          // Checkbox ikut status hadir (visual sahaja)
-          const checked = attending === "yes" ? "checked" : "";
 
           tableRows += `
             <tr>
@@ -73,55 +71,48 @@
               <td style="text-align:center;">${pax}</td>
               <td>${note}</td>
               <td style="text-align:center; display:none;">
-                <input type="checkbox" ${checked} disabled>
+                <input type="checkbox" ${attending === "yes" ? "checked" : ""} disabled>
               </td>
               <td style="text-align:center;">
-                <input type="checkbox">
+                <input type="checkbox" class="checkBox" data-id="${id}" ${checked}>
               </td>
             </tr>
           `;
         });
 
-        // Update HTML
         document.getElementById("rsvp-table-body").innerHTML = tableRows;
         document.getElementById("total-pax").innerText = total;
+
+        // 🔹 Attach event listener to new checkboxes
+        document.querySelectorAll(".checkBox").forEach(cb => {
+          cb.addEventListener("change", async function() {
+            const docId = this.getAttribute("data-id");
+            const docRef = doc(db, "rsvps", docId);
+
+            await updateDoc(docRef, {
+              checked: this.checked
+            });
+          });
+        });
       });
     }
 
     listenRSVPs();
-
-// Restore saved states from localStorage
-document.querySelectorAll('#rsvp-table-body input[type="checkbox"]').forEach((cb, i) => {
-  if (localStorage.getItem("checkbox_" + i) === "true") {
-    cb.checked = true;
-  }
-
-  // Save state on change
-  cb.addEventListener("change", function() {
-    localStorage.setItem("checkbox_" + i, this.checked);
-  });
-});
-
-    
   </script>
 </head>
 <body style="font-family: Times New Roman, sans-serif; text-align:center; padding:20px;">
 
   <h2>Senarai RSVP</h2>
-  
-
-
 
   <!-- Search bar -->
   <input type="text" id="searchInput" placeholder="Cari nama..." 
          style="margin-bottom:10px; padding:5px; width:200px;">
 
-
+  <!-- Jumlah Pax -->
+  <h4 style="text-align:center;">Jumlah Pax Hadir: <span id="total-pax">0</span></h4> 
 
   <!-- Table -->
   <table border="1" cellpadding="10" cellspacing="0" style="margin:auto; border-collapse: collapse; width:90%;">
-     <!-- Jumlah Pax -->
-  <h4 style="text-align:center;">Jumlah Pax Hadir: <span id="total-pax">0</span></h4> 
     <thead style="background:#f2f2f2;">
       <tr>
         <th style="text-align:center;">Bil.</th>
